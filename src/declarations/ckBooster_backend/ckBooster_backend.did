@@ -1,0 +1,51 @@
+type Account = record { owner : principal; subaccount : opt blob };
+type BoostRequest = record {
+  fee : opt nat64;
+  status : BoostRequestStatus;
+  tx_id : text;
+  account : opt Account;
+  timestamp : opt nat64;
+  amount : nat64;
+};
+type BoostRequestArg = record {
+  fee : opt nat64;
+  tx_id : text;
+  account : opt Account;
+  amount : nat64;
+};
+type BoostRequestError = variant {
+  InvalidAmount;
+  OpenBoostRequest;
+  InsufficientBalance;
+  RequestNotFound;
+  PrincipalMismatch;
+  InternalError;
+};
+type BoostRequestResult = record { timestamp : nat64 };
+type BoostRequestStatus = variant {
+  SettlmentPending;
+  Open;
+  Boosted : principal;
+  BoostPending;
+  Settled;
+};
+type FetchBoostRequestArgs = record {
+  status : opt BoostRequestStatus;
+  amount_from : opt nat64;
+  amount_to : opt nat64;
+  timestamp_from : opt nat64;
+};
+type InitArg = record {
+  ck_ledger_id : principal;
+  ck_index_id : principal;
+  service_fee_in_percent : opt nat64;
+  booster_fee_in_percent : opt nat64;
+  min_booster_balance : opt nat64;
+};
+type Result = variant { Ok : BoostRequestResult; Err : BoostRequestError };
+type Result_1 = variant { Ok : vec BoostRequest; Err : BoostRequestError };
+service : (InitArg) -> {
+  boost_request : (principal) -> (Result);
+  fetch_boost_requests : (FetchBoostRequestArgs) -> (Result_1) query;
+  register_boost_request : (BoostRequestArg) -> (Result);
+}
