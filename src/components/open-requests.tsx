@@ -1,3 +1,5 @@
+'use client'
+
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Table,
@@ -88,7 +90,7 @@ export default function OpenRequests() {
                         index % 2 === 0 ? 'bg-gray-900' : 'bg-gray-800'
                       }
                     >
-                      <TableCell className="font-medium text-blue-400">
+                      <TableCell suppressHydrationWarning className="font-medium text-blue-400">
                         {new Date(request.timestamp).toLocaleString()}
                       </TableCell>
                       <TableCell className="text-green-400">

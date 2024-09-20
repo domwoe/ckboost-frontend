@@ -4,18 +4,16 @@ import React, { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { ClipboardIcon, CheckIcon } from '@radix-ui/react-icons';
 import { Button } from '@/components/ui/button';
-import { ConnectWallet } from "@nfid/identitykit/react"
+import { ConnectWallet, ConnectWalletButton } from "@nfid/identitykit/react"
 import { useIdentityKit } from "@nfid/identitykit/react"
 import { CkBTCMinterCanister } from "@dfinity/ckbtc";
-import { createAgent } from "@dfinity/utils";
-import { HttpAgent } from "@dfinity/agent";
 import { Principal } from '@dfinity/principal';
 
 const CKBTC_MINTER_CANISTER_ID = Principal.fromText("ml52i-qqaaa-aaaar-qaaba-cai");
 
 
 const RequestBoost: React.FC = () => {
-  const { agent, user, identity } = useIdentityKit()
+  const { agent, user, disconnect } = useIdentityKit()
   
   const [currentStep, setCurrentStep] = useState(1);
   const [amount, setAmount] = useState('');
@@ -25,6 +23,8 @@ const RequestBoost: React.FC = () => {
   useEffect(() => {
     if (user) {
       setCurrentStep(2);
+    } else {
+      setCurrentStep(1);
     }
   }, [user]);
 
@@ -35,53 +35,43 @@ const RequestBoost: React.FC = () => {
     { title: 'Register Boost', completed: currentStep > 4 },
   ];
 
- 
+  const disconnetWallet = () => {
 
-  const connectWallet = () => {
-    // Implement wallet connection logic
-    setCurrentStep(2);
+    disconnect();
+
   };
-
+ 
   const setConversionAmount = async () => {
 
     console.log('set conversion');
-    let btcAddress = '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2';
+    let btcAddress = '';
 
-    console.log(identity);
-
-    console.log(user);
 
     if (user?.principal) {
       console.log('Identity and user principal')
 
-    //   const agent = HttpAgent.createSync({host: 'https://icp-api.io'});
         if (agent) {
-    //   const agent = await createAgent({ identity });
-        const { getBtcAddress, getMinterInfo } = CkBTCMinterCanister.create({
+          
+        const { getBtcAddress } = CkBTCMinterCanister.create({
             agent,
             canisterId: CKBTC_MINTER_CANISTER_ID,
         });
 
-        const minterInfo = await getMinterInfo({ certified: false });
-
-        console.log(minterInfo);
-
-        btcAddress = await getBtcAddress({
-            owner: user.principal,
-            subaccount: user.subaccount?.toUint8Array()
-        });
+        btcAddress = (await getBtcAddress({
+            owner: user.principal
+        }).catch(e => {
+          console.log(e);
+        })) as string;
 
     }
-
-
 
       console.log(btcAddress)
     }
 
     // Implement amount setting logic
-    // setCurrentStep(3);
+    setCurrentStep(3);
     // For demo purposes, set a dummy Bitcoin address
-    // setBitcoinAddress(btcAddress);
+    setBitcoinAddress(btcAddress);
   };
 
   const copyToClipboard = () => {
@@ -130,7 +120,7 @@ const RequestBoost: React.FC = () => {
             {currentStep === 1 && (
               <div className="mb-4">
                 <h2 className="text-lg font-semibold mb-2">Connect ICP Wallet</h2>
-                {/* <ConnectWallet /> */}
+                <ConnectWallet />
               </div>
             )}
 
@@ -139,7 +129,7 @@ const RequestBoost: React.FC = () => {
         
         <h2 className="text-lg font-semibold mb-2">Account to be credited with ckBTC</h2>
                 {user?.principal?.toString()}
-                <ConnectWallet />
+                <Button onClick={disconnetWallet}>Disconnect</Button>
 
                 <h2 className="text-lg font-semibold mb-2 py-4">Set Amount to Convert</h2>
                 <span>

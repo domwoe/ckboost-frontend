@@ -6,6 +6,7 @@ import Header from '../components/header';
 import HeroSection from '../components/hero-section';
 import OpenRequests from '../components/open-requests';
 import { IdentityKitProvider } from "@nfid/identitykit/react"
+import { IdentityKitAuthType } from "@nfid/identitykit"
 import { HttpAgent } from "@dfinity/agent";
 
 export default function CkBoostPage() {
@@ -21,7 +22,7 @@ export default function CkBoostPage() {
 
   return (
     
-    <IdentityKitProvider agent={agent}>
+    <IdentityKitProvider agent={agent} authType={IdentityKitAuthType.DELEGATION}>
     <div className="min-h-screen font-mono">
       <Header />
 
@@ -36,4 +37,4 @@ export default function CkBoostPage() {
     </div>
     </IdentityKitProvider>
   );
-}
+} 
